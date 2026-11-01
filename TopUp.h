@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <ctime>
+#include "PurchaseHistory.h"
 
 class MLTopUpSystem {
 private:
@@ -26,6 +27,7 @@ private:
 
     Node* head;
     Node* tail;
+    PurchaseHistory& history;   // shared with the Main Menu
 
     // Merge two sorted linked lists.
     Node* merge(Node* left, Node* right, bool ascending) {
@@ -308,12 +310,20 @@ private:
         std::cout << "Status: Sent" << std::endl;
         std::cout << "===============================" << std::endl;
 
+        // Save this purchase to Purchase History.
+        int dateKey = 0;
+        if (localTime != nullptr)
+            dateKey = (localTime->tm_year + 1900) * 10000
+                    + (localTime->tm_mon + 1) * 100
+                    + localTime->tm_mday;
+        history.addTransaction(dateKey, playerID, zoneID, totalDiamonds, total);
+
 
         clearCart();
     }
 
 public:
-    MLTopUpSystem() : head(nullptr), tail(nullptr) {}
+    MLTopUpSystem(PurchaseHistory& h) : head(nullptr), tail(nullptr), history(h) {}
 
     MLTopUpSystem(const MLTopUpSystem&) = delete;
     MLTopUpSystem& operator=(const MLTopUpSystem&) = delete;

@@ -2,16 +2,16 @@
 #define MMENU_H
 
 #include <iostream>
+#include "PurchaseHistory.h"
 #include "TopUp.h"
 
 class MainMenu {
 private:
+    PurchaseHistory history;      // declared first so it exists before topUpSystem
     MLTopUpSystem topUpSystem;
 
     void displayPurchaseHistory() {
-        std::cout << "\n PURCHASE HISTORY \n";
-        std::cout << "No recent transactions found...\n";
-        std::cout << "\n";
+        history.run();
     }
 
     void displayAccountDetails() {
@@ -22,6 +22,10 @@ private:
     }
 
 public:
+    MainMenu() : topUpSystem(history) {
+        history.loadSampleData();   // demo data only; delete this line for the real thing
+    }
+
     void displayMenu() {
         std::cout << "\n ------------- \n";
         std::cout << "              MAIN MENU              \n";
