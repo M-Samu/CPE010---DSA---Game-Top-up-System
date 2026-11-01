@@ -1,10 +1,8 @@
-#include <iostream>
-#include "TopUp.h"
+#include "mMenu.h"
 
 int main() {
-    MLTopUpSystem topUp;
-    topUp.run();
+    MainMenu menu;
+    menu.run();
 
     return 0;
 }
-
