@@ -1,2 +1,4 @@
-# CPE010---DSA---Game-Top-up-System
-A final project repository for DSA CPE010
+Progress 1: top-up system
+- Created a top-up system.
+- pay-later function is still in development.
+
