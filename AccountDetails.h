@@ -27,12 +27,12 @@ public:
     }
 
     void display() const {
-        std::cout << "\n========== ACCOUNT DETAILS ==========\n";
+        std::cout << "\n----------- ACCOUNT DETAILS ----------\n";
         std::cout << "Username          : " << username << '\n';
         std::cout << "Player ID         : " << playerID << '\n';
         std::cout << "Zone ID           : " << zoneID << '\n';
         std::cout << "Email             : " << email << '\n';
-        std::cout << "=====================================\n";
+        std::cout << "------------------------------------------\n";
     }
 };
 

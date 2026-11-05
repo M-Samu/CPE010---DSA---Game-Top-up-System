@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include "PurchaseHistory.h"
-#include "TopUp.h"
+#include "mLTopUp.h"
+#include "wRTopUp.h"
+#include "hokTopUp.h"
 
 class MainMenu {
 private:
