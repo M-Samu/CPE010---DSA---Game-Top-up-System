@@ -198,7 +198,7 @@ private:
             return;
         }
 
-        std::cout << "\\nEnter your Honor of Kings Player Email: ";
+        std::cout << "\nEnter your Honor of Kings Player Email: ";
         if (!(std::cin >> playerEmail)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');

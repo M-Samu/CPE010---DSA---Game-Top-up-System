@@ -198,7 +198,7 @@ private:
             return;
         }
 
-        std::cout << "\\nEnter your Wild Rift Player ID: ";
+        std::cout << "\nEnter your Wild Rift Player ID: ";
         if (!(std::cin >> playerID)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');

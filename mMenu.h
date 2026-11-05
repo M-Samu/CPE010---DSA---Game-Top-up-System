@@ -2,6 +2,8 @@
 #define MMENU_H
 
 #include <iostream>
+#include <string>
+#include "Login.h"
 #include "PurchaseHistory.h"
 #include "mLTopUp.h"
 #include "wRTopUp.h"
@@ -23,7 +25,32 @@ private:
     void displayAccountDetails() {
         account.display();
     }
-    
+
+    // Register / Login screen. Returns true once the user has logged in,
+    // false if they choose to exit.
+    bool loginScreen(LoginAccount& who) {
+        while (true) {
+            std::cout << "\n======== WELCOME ========\n";
+            std::cout << "1. Register\n";
+            std::cout << "2. Login\n";
+            std::cout << "3. Forgot Password\n";
+            std::cout << "4. Exit\n";
+            std::cout << "=========================\n";
+            std::cout << "Choose: ";
+
+            std::string choice;
+            if (!std::getline(std::cin, choice)) return false;
+
+            if (choice == "1") registerLogin();
+            else if (choice == "2") {
+                if (checkLogin(who)) return true;
+            }
+            else if (choice == "3") forgotPassword();
+            else if (choice == "4") return false;
+            else std::cout << "Invalid choice.\n";
+        }
+    }
+
     void runTopUpMenu() {
         int choice = 0;
         while(true) {
@@ -34,14 +61,14 @@ private:
             std::cout << "0. Back to Main Menu\n";
             std::cout << "=============================\n";
             std::cout << "Select a game: ";
-            
+
             if (!(std::cin >> choice)) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
                 std::cout << "\nInvalid input.\n";
                 continue;
             }
-            
+
             if (choice == 1) mlTopUp.run();
             else if (choice == 2) wrTopUp.run();
             else if (choice == 3) hokTopUp.run();
@@ -51,16 +78,16 @@ private:
     }
 
 public:
-    MainMenu() 
-        : mlTopUp(history), 
-          wrTopUp(history), 
+    MainMenu()
+        : mlTopUp(history),
+          wrTopUp(history),
           hokTopUp(history),
           account(history) // Pass the shared history to AccountDetails
     {
-        history.loadSampleData(); 
-        
+        history.loadSampleData();
+
         // Optional: Pre-set a dummy account for demo purposes
-        account.setDetails("Dustin", "123456789", "1234", "dustin@email.com");
+        account.setDetails("Dustin");
     }
 
     void displayMenu() {
@@ -75,6 +102,16 @@ public:
     }
 
     void run() {
+        // Must register / log in before reaching the main menu
+        LoginAccount who;
+        if (!loginScreen(who)) {
+            std::cout << "\nExiting application. Thank you!\n";
+            return;
+        }
+
+        // Show the logged-in user's saved details in Account Details
+        account.setDetails(who.username);
+
         int choice = 0;
 
         while (true) {
