@@ -3,16 +3,15 @@
 
 #include <iostream>
 #include <string>
-#include <iomanip>
 #include "PurchaseHistory.h"
-#include "payMethod.h"
 
 class AccountDetails {
 private:
     std::string username;
-    PurchaseHistory& history;
+    PurchaseHistory& history; // Reference to shared history
 
 public:
+    // Initializer list is in the same order the members are declared above
     AccountDetails(
         PurchaseHistory& h,
         const std::string& name = "Guest"
@@ -25,31 +24,11 @@ public:
     void display() const {
         std::cout << "\n----------- ACCOUNT DETAILS ----------\n";
         std::cout << "Username          : " << username << '\n';
-        
-        // Show current BNPL Balance
-        double currentBalance = PayMethod::globalInstallmentQueue.getTotalBalance();
-        std::cout << "Outstanding Pay Later Balance: PHP " << std::fixed << std::setprecision(2) << currentBalance << '\n';
-        
         std::cout << "------------------------------------------\n";
-
-        // Has an option to pay early when has balance
-        if (currentBalance > 0) {
-            char choice;
-            std::cout << "Would you like to pay early now? (Y/N): ";
-            std::cin >> choice;
-            
-            if (choice == 'Y' || choice == 'y') {
-                PayMethod::globalInstallmentQueue.processNextInstallment();
-            }
-        }
 
         std::cout << "\n--- RECENT ACCOUNT PURCHASES ---\n";
-        history.displayAll(username); // Filters purchases by this username
+        history.displayAll();
         std::cout << "------------------------------------------\n";
-    }
-    
-    void openHistoryMenu() const {
-        history.run(username); // Opens the history menu for this user
     }
 };
 

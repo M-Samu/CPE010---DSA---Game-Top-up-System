@@ -108,37 +108,37 @@ private:
             tail->next = newNode;
             tail = newNode;
         }
-        std::cout << "\nAdded " << diamondPackages[index] << " diamonds to your cart." << std::endl;
+        std::cout << "\nAdded " << diamondPackages[index] << " diamonds to your cart.\n";
     }
 
     void displayCart() {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty." << std::endl;
+            std::cout << "\nYour cart is empty.\n";
             return;
         }
         int total = 0;
         int itemNumber = 1;
-        std::cout << "\n========== YOUR CART ==========" << std::endl;
+        std::cout << "\n========== YOUR CART ==========\n";
         std::cout << std::left << std::setw(8) << "Item"
                   << std::setw(18) << "Diamonds"
-                  << std::setw(12) << "Price" << std::endl;
-        std::cout << "--------------------------------------" << std::endl;
+                  << std::setw(12) << "Price\n";
+        std::cout << "--------------------------------------\n";
         Node* current = head;
         while (current != nullptr) {
             std::cout << std::left << std::setw(8) << itemNumber
                       << std::setw(18) << current->diamonds
-                      << "PHP " << std::fixed << current->price << std::endl;
+                      << "PHP " << std::fixed << current->price << '\n';
             total += current->price;
             current = current->next;
             itemNumber++;
         }
-        std::cout << "--------------------------------------" << std::endl;
-        std::cout << "Total: PHP " << total << std::endl;
+        std::cout << "--------------------------------------\n";
+        std::cout << "Total: PHP " << total << '\n';
     }
 
     void removeFromCart() {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty." << std::endl;
+            std::cout << "\nYour cart is empty.\n";
             return;
         }
         displayCart();
@@ -147,11 +147,11 @@ private:
         if (!(std::cin >> position)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Invalid input." << std::endl;
+            std::cout << "Invalid input.\n";
             return;
         }
         if (position < 1) {
-            std::cout << "Invalid item number." << std::endl;
+            std::cout << "Invalid item number.\n";
             return;
         }
         Node* current = head;
@@ -163,7 +163,7 @@ private:
             currentPosition++;
         }
         if (current == nullptr) {
-            std::cout << "Item number not found." << std::endl;
+            std::cout << "Item number not found.\n";
             return;
         }
         if (previous == nullptr) {
@@ -172,7 +172,7 @@ private:
             previous->next = current->next;
         }
         if (current == tail) tail = previous;
-        std::cout << current->diamonds << " diamonds removed from your cart." << std::endl;
+        std::cout << current->diamonds << " diamonds removed from your cart.\n";
         delete current;
     }
 
@@ -185,9 +185,9 @@ private:
         tail = nullptr;
     }
 
-    void checkout(const std::string& user) {
+    void checkout() {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty. Add a package first." << std::endl;
+            std::cout << "\nYour cart is empty. Add a package first.\n";
             return;
         }
         displayCart();
@@ -195,15 +195,15 @@ private:
         std::cout << "\nProceed to checkout? (Y/N): ";
         std::cin >> confirm;
         if (confirm != 'Y' && confirm != 'y') {
-            std::cout << "Checkout cancelled." << std::endl;
+            std::cout << "Checkout cancelled.\n";
             return;
         }
 
-        std::cout << "\nEnter your Mobile Legends Player ID: ";
+        std::cout << "\\nEnter your Mobile Legends Player ID: ";
         if (!(std::cin >> playerID)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Invalid Player ID." << std::endl;
+            std::cout << "Invalid Player ID.\\n";
             return;
         }
 
@@ -211,7 +211,7 @@ private:
         if (!(std::cin >> zoneID)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Invalid Zone ID." << std::endl;
+            std::cout << "Invalid Zone ID.\n";
             return;
         }
 
@@ -224,11 +224,11 @@ private:
             current = current->next;
         }
 
-        // Payment Method Execution
+        // --- Execute Payment Method ---
         double finalTotal = PayMethod::processPayment(total);
         int finalTotalInt = static_cast<int>(std::round(finalTotal));
 
-        std::cout << "\n========== RECEIPT ==========" << std::endl;
+        std::cout << "\n========== RECEIPT ==========\n";
         std::time_t now = std::time(nullptr);
         std::tm* localTime = std::localtime(&now);
         if (localTime != nullptr) {
@@ -247,7 +247,7 @@ private:
         if (localTime != nullptr)
             dateKey = (localTime->tm_year + 1900) * 10000 + (localTime->tm_mon + 1) * 100 + localTime->tm_mday;
             
-        history.addTransaction(user, dateKey, playerID, zoneID, totalDiamonds, finalTotalInt);
+        history.addTransaction(dateKey, playerID, zoneID, totalDiamonds, finalTotalInt);
         clearCart();
     }
 
@@ -262,7 +262,7 @@ public:
         std::cout << std::left << std::setw(8) << "Option" << std::setw(18) << "Diamonds" << "Price (PHP)" << std::endl;
         std::cout << "-------------------------------------" << std::endl;
         for (int i = 0; i < 6; i++) {
-            std::cout << std::left << std::setw(8) << i + 1 << std::setw(18) << diamondPackages[i] << std::fixed << packagePrices[i] << std::endl;
+            std::cout << std::left << std::setw(8) << i + 1 << std::setw(18) << diamondPackages[i] << std::fixed << packagePrices[i] << '\n';
         }
         std::cout << "-------------------------------------" << std::endl;
         std::cout << "7. View Cart\n8. Checkout\n9. Remove Item from Cart\n";
@@ -272,7 +272,7 @@ public:
         std::cout << "=====================================" << std::endl;
     }
 
-    void run(const std::string& user = "Guest") {
+    void run() {
         int choice;
         while (true) {
             displayPackages();
@@ -280,7 +280,7 @@ public:
             if (!(std::cin >> choice)) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
-                std::cout << "Invalid input. Please enter a number.\n";
+                std::cout << "Invalid input. Please enter a number.\\n";
                 continue;
             }
             if (choice >= 1 && choice <= 6) {
@@ -288,12 +288,12 @@ public:
             } else {
                 switch (choice) {
                     case 7: displayCart(); break;
-                    case 8: checkout(user); break;
+                    case 8: checkout(); break;
                     case 9: removeFromCart(); break;
                     case 10: sortPackages(true); break;
                     case 11: sortPackages(false); break;
-                    case 0: std::cout << "\nThank you for using ML Top-Up!" << std::endl; return;
-                    default: std::cout << "\nInvalid choice. Try again." << std::endl;
+                    case 0: std::cout << "\nThank you for using ML Top-Up!\n"; return;
+                    default: std::cout << "\nInvalid choice. Try again.\n";
                 }
             }
         }
