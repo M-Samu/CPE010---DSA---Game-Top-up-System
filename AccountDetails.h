@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include "PurchaseHistory.h"
 
 class AccountDetails {
 private:
@@ -10,14 +11,16 @@ private:
     std::string playerID;
     std::string zoneID;
     std::string email;
+    PurchaseHistory& history; // Reference to shared history
 
 public:
     AccountDetails(
+        PurchaseHistory& h,
         const std::string& name = "Guest",
         const std::string& pID = "Not Set",
         const std::string& zID = "Not Set",
         const std::string& mail = "Not Set"
-    ) : username(name), playerID(pID), zoneID(zID), email(mail) {}
+    ) : history(h), username(name), playerID(pID), zoneID(zID), email(mail) {}
 
     void setDetails(const std::string& name, const std::string& pID, const std::string& zID, const std::string& mail) {
         username = name;
@@ -32,6 +35,10 @@ public:
         std::cout << "Player ID         : " << playerID << '\n';
         std::cout << "Zone ID           : " << zoneID << '\n';
         std::cout << "Email             : " << email << '\n';
+        std::cout << "------------------------------------------\n";
+        
+        std::cout << "\n--- RECENT ACCOUNT PURCHASES ---\n";
+        history.displayAll(); 
         std::cout << "------------------------------------------\n";
     }
 };

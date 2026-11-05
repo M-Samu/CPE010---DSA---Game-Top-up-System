@@ -6,33 +6,68 @@
 #include "mLTopUp.h"
 #include "wRTopUp.h"
 #include "hokTopUp.h"
+#include "AccountDetails.h"
 
 class MainMenu {
 private:
-    PurchaseHistory history;      // declared first so it exists before topUpSystem
-    MLTopUpSystem topUpSystem;
+    PurchaseHistory history;      // declared first so it exists before others
+    MLTopUpSystem mlTopUp;
+    WRTopUpSystem wrTopUp;
+    HOKTopUpSystem hokTopUp;
+    AccountDetails account;
 
     void displayPurchaseHistory() {
         history.run();
     }
 
     void displayAccountDetails() {
-        std::cout << "\n ACCOUNT DETAILS \n";
-        std::cout << "Account Name: \n";
-        std::cout << "Loyalty Level: \n";
-        std::cout << " \n";
+        account.display();
+    }
+    
+    void runTopUpMenu() {
+        int choice = 0;
+        while(true) {
+            std::cout << "\n======== TOP-UP MENU ========\n";
+            std::cout << "1. Mobile Legends (MLBB)\n";
+            std::cout << "2. Wild Rift (WR)\n";
+            std::cout << "3. Honor of Kings (HOK)\n";
+            std::cout << "0. Back to Main Menu\n";
+            std::cout << "=============================\n";
+            std::cout << "Select a game: ";
+            
+            if (!(std::cin >> choice)) {
+                std::cin.clear();
+                std::cin.ignore(10000, '\n');
+                std::cout << "\nInvalid input.\n";
+                continue;
+            }
+            
+            if (choice == 1) mlTopUp.run();
+            else if (choice == 2) wrTopUp.run();
+            else if (choice == 3) hokTopUp.run();
+            else if (choice == 0) break;
+            else std::cout << "\nInvalid choice.\n";
+        }
     }
 
 public:
-    MainMenu() : topUpSystem(history) {
-        history.loadSampleData();   // demo data only; delete this line for the real thing
+    MainMenu() 
+        : mlTopUp(history), 
+          wrTopUp(history), 
+          hokTopUp(history),
+          account(history) // Pass the shared history to AccountDetails
+    {
+        history.loadSampleData(); 
+        
+        // Optional: Pre-set a dummy account for demo purposes
+        account.setDetails("Dustin", "123456789", "1234", "dustin@email.com");
     }
 
     void displayMenu() {
         std::cout << "\n ------------- \n";
         std::cout << "              MAIN MENU              \n";
         std::cout << "\n";
-        std::cout << "1. Top-up\n";
+        std::cout << "1. Top-up Games\n";
         std::cout << "2. Purchase History\n";
         std::cout << "3. Account Details\n";
         std::cout << "4. Exit\n";
@@ -55,7 +90,7 @@ public:
 
             switch (choice) {
                 case 1:
-                    topUpSystem.run();
+                    runTopUpMenu();
                     break;
                 case 2:
                     displayPurchaseHistory();

@@ -6,20 +6,23 @@
 #include <string>
 #include <cstdio>
 
-// One saved transaction (one checkout = one record).
+// Base Transaction (for MLBB - legacy format)
 struct Transaction {
     int id;
-    int dateKey;        // YYYYMMDD, e.g. 20261102 (easy to compare/sort)
+    int dateKey;
     int playerID;
-    int zoneID;
-    int totalDiamonds;
+    int zoneID; // -1 if not applicable
+    std::string playerEmail; // Empty if not applicable
+    int totalItems; // generic for diamonds, cores, tokens
     int totalAmount;
+    std::string currencyName; // "Diamonds", "Cores", "Tokens"
+    std::string gameName;
     std::string status;
 };
 
 class PurchaseHistory {
 private:
-    Transaction* records;   // dynamic array
+    Transaction* records;   
     int count;
     int capacity;
     int nextID;
@@ -33,7 +36,6 @@ private:
         records = bigger;
     }
 
-    // Binary search: first index whose dateKey >= target.
     int lowerBound(int target) const {
         int low = 0, high = count;
         while (low < high) {
@@ -46,7 +48,6 @@ private:
         return low;
     }
 
-    // Binary search: first index whose dateKey > target.
     int upperBound(int target) const {
         int low = 0, high = count;
         while (low < high) {
@@ -73,26 +74,31 @@ private:
         std::cout << std::left
                   << std::setw(6)  << "ID"
                   << std::setw(20) << "Date"
-                  << std::setw(14) << "Player ID"
-                  << std::setw(8)  << "Zone"
-                  << std::setw(10) << "Diamonds"
+                  << std::setw(15) << "Game"
+                  << std::setw(25) << "Account (ID/Email)"
+                  << std::setw(15) << "Item Count"
                   << std::setw(12) << "Amount"
                   << "Status\n";
-        std::cout << "-------------------------------------------------------------------------\n";
+        std::cout << "------------------------------------------------------------------------------------------------------\n";
     }
 
     static void printRow(const Transaction& t) {
+        std::string accountStr = (t.playerEmail.empty()) 
+            ? std::to_string(t.playerID) + (t.zoneID != -1 ? " (" + std::to_string(t.zoneID) + ")" : "")
+            : t.playerEmail;
+            
+        std::string itemStr = std::to_string(t.totalItems) + " " + t.currencyName;
+
         std::cout << std::left
                   << std::setw(6)  << t.id
                   << std::setw(20) << formatDate(t.dateKey)
-                  << std::setw(14) << t.playerID
-                  << std::setw(8)  << t.zoneID
-                  << std::setw(10) << t.totalDiamonds
+                  << std::setw(15) << t.gameName
+                  << std::setw(25) << accountStr
+                  << std::setw(15) << itemStr
                   << std::setw(12) << ("PHP " + std::to_string(t.totalAmount))
                   << t.status << "\n";
     }
 
-    // Reads "YYYY-MM-DD". Returns YYYYMMDD, or -1 if invalid.
     static int readDate(const std::string& prompt) {
         std::string input;
         std::cout << prompt;
@@ -108,38 +114,50 @@ private:
 
 public:
     PurchaseHistory() : records(new Transaction[10]), count(0), capacity(10), nextID(1) {}
-
     PurchaseHistory(const PurchaseHistory&) = delete;
     PurchaseHistory& operator=(const PurchaseHistory&) = delete;
-
     ~PurchaseHistory() { delete[] records; }
 
-    // Called by checkout(). New purchases always happen "today", so
-    // appending keeps the array sorted by date (needed for binary search).
-    void addTransaction(int dateKey, int playerID, int zoneID,
-                        int totalDiamonds, int totalAmount) {
-        if (count == capacity)
-            grow();
-
-        // Safety: keep the array sorted even if a record is out of order.
+    // MLBB
+    void addTransaction(int dateKey, int playerID, int zoneID, int totalDiamonds, int totalAmount) {
+        if (count == capacity) grow();
         int pos = count;
         while (pos > 0 && records[pos - 1].dateKey > dateKey) {
             records[pos] = records[pos - 1];
             pos--;
         }
-
-        records[pos] = {nextID++, dateKey, playerID, zoneID,
-                        totalDiamonds, totalAmount, "Sent"};
+        records[pos] = {nextID++, dateKey, playerID, zoneID, "", totalDiamonds, totalAmount, "Diamonds", "MLBB", "Sent"};
         count++;
     }
 
-    // Optional: fake old records so FilterDate has something to find in the demo.
+    // WR
+    void addTransaction(int dateKey, int playerID, int totalCores, int totalAmount) {
+        if (count == capacity) grow();
+        int pos = count;
+        while (pos > 0 && records[pos - 1].dateKey > dateKey) {
+            records[pos] = records[pos - 1];
+            pos--;
+        }
+        records[pos] = {nextID++, dateKey, playerID, -1, "", totalCores, totalAmount, "Cores", "Wild Rift", "Sent"};
+        count++;
+    }
+
+    // HOK
+    void addTransaction(int dateKey, const std::string& playerEmail, int totalTokens, int totalAmount) {
+        if (count == capacity) grow();
+        int pos = count;
+        while (pos > 0 && records[pos - 1].dateKey > dateKey) {
+            records[pos] = records[pos - 1];
+            pos--;
+        }
+        records[pos] = {nextID++, dateKey, 0, -1, playerEmail, totalTokens, totalAmount, "Tokens", "HoK", "Sent"};
+        count++;
+    }
+
     void loadSampleData() {
-        addTransaction(20260915, 123456789, 1234,  86,   49);
-        addTransaction(20260915, 123456789, 1234, 172,   99);
-        addTransaction(20261003, 123456789, 1234, 706,  399);
-        addTransaction(20261020, 123456789, 1234, 344,  199);
-        addTransaction(20261028, 123456789, 1234, 1412, 799);
+        addTransaction(20260915, 123456789, 1234, 86, 49);  // MLBB
+        addTransaction(20260916, 987654321, 1000, 449);     // WR
+        addTransaction(20261003, "gamer@email.com", 80, 65); // HOK
     }
 
     void displayAll() const {
@@ -147,23 +165,19 @@ public:
             std::cout << "\nNo recent transactions found...\n";
             return;
         }
-
         std::cout << "\n";
         printHeader();
         for (int i = 0; i < count; i++)
             printRow(records[i]);
     }
 
-    // FilterDate: show transactions from startKey to endKey (inclusive).
-    // Uses binary search to find both ends of the range.
     void filterDate(int startKey, int endKey) const {
         if (startKey > endKey) {
             std::cout << "\nStart date must not be after end date.\n";
             return;
         }
-
-        int first = lowerBound(startKey);   // first record >= start
-        int last  = upperBound(endKey);     // first record  > end
+        int first = lowerBound(startKey);
+        int last  = upperBound(endKey);
 
         if (first >= last) {
             std::cout << "\nNo transactions found for that date.\n";
@@ -177,14 +191,12 @@ public:
             printRow(records[i]);
             total += records[i].totalAmount;
         }
-        std::cout << "-------------------------------------------------------------------------\n";
+        std::cout << "------------------------------------------------------------------------------------------------------\n";
         std::cout << (last - first) << " transaction(s) | Total spent: PHP " << total << "\n";
     }
 
-    // Submenu shown from Main Menu > Purchase History.
     void run() const {
         int choice = -1;
-
         while (choice != 0) {
             std::cout << "\n======= PURCHASE HISTORY =======\n";
             std::cout << "1. View all transactions\n";
@@ -206,17 +218,13 @@ public:
                 displayAll();
             } else if (choice == 2) {
                 int d = readDate("\nEnter date (YYYY-MM-DD): ");
-                if (d == -1)
-                    std::cout << "Invalid date format.\n";
-                else
-                    filterDate(d, d);
+                if (d == -1) std::cout << "Invalid date format.\n";
+                else filterDate(d, d);
             } else if (choice == 3) {
                 int s = readDate("\nEnter start date (YYYY-MM-DD): ");
                 int e = (s == -1) ? -1 : readDate("Enter end date (YYYY-MM-DD): ");
-                if (s == -1 || e == -1)
-                    std::cout << "Invalid date format.\n";
-                else
-                    filterDate(s, e);
+                if (s == -1 || e == -1) std::cout << "Invalid date format.\n";
+                else filterDate(s, e);
             } else if (choice != 0) {
                 std::cout << "\nInvalid choice.\n";
             }
