@@ -86,7 +86,7 @@ private:
         }
         clearList(sortedList);
         std::cout << "\nPackages sorted by price: "
-                  << (ascending ? "Lowest to Highest\n" : "Highest to Lowest\n");
+                  << (ascending ? "Lowest to Highest" : "Highest to Lowest") << std::endl;
         displayPackages();
     }
 
@@ -107,37 +107,37 @@ private:
             tail->next = newNode;
             tail = newNode;
         }
-        std::cout << "\nAdded " << tokensPackages[index] << " tokens to your cart.\n";
+        std::cout << "\nAdded " << tokensPackages[index] << " tokens to your cart." << std::endl;
     }
 
     void displayCart() {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty.\n";
+            std::cout << "\nYour cart is empty." << std::endl;
             return;
         }
         int total = 0;
         int itemNumber = 1;
-        std::cout << "\n========== YOUR CART ==========\n";
+        std::cout << "\n========== YOUR CART ==========" << std::endl;
         std::cout << std::left << std::setw(8) << "Item"
                   << std::setw(18) << "Tokens"
-                  << std::setw(12) << "Price\n";
-        std::cout << "--------------------------------------\n";
+                  << std::setw(12) << "Price" << std::endl;
+        std::cout << "--------------------------------------" << std::endl;
         Node* current = head;
         while (current != nullptr) {
             std::cout << std::left << std::setw(8) << itemNumber
                       << std::setw(18) << current->tokens
-                      << "PHP " << std::fixed << current->price << '\n';
+                      << "PHP " << std::fixed << current->price << std::endl;
             total += current->price;
             current = current->next;
             itemNumber++;
         }
-        std::cout << "--------------------------------------\n";
-        std::cout << "Total: PHP " << total << '\n';
+        std::cout << "--------------------------------------" << std::endl;
+        std::cout << "Total: PHP " << total << std::endl;
     }
 
     void removeFromCart() {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty.\n";
+            std::cout << "\nYour cart is empty." << std::endl;
             return;
         }
         displayCart();
@@ -146,11 +146,11 @@ private:
         if (!(std::cin >> position)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Invalid input.\n";
+            std::cout << "Invalid input." << std::endl;
             return;
         }
         if (position < 1) {
-            std::cout << "Invalid item number.\n";
+            std::cout << "Invalid item number." << std::endl;
             return;
         }
         Node* current = head;
@@ -162,7 +162,7 @@ private:
             currentPosition++;
         }
         if (current == nullptr) {
-            std::cout << "Item number not found.\n";
+            std::cout << "Item number not found." << std::endl;
             return;
         }
         if (previous == nullptr) {
@@ -171,7 +171,7 @@ private:
             previous->next = current->next;
         }
         if (current == tail) tail = previous;
-        std::cout << current->tokens << " tokens removed from your cart.\n";
+        std::cout << current->tokens << " tokens removed from your cart." << std::endl;
         delete current;
     }
 
@@ -184,9 +184,9 @@ private:
         tail = nullptr;
     }
 
-    void checkout() {
+    void checkout(const std::string& user) {
         if (head == nullptr) {
-            std::cout << "\nYour cart is empty. Add a package first.\n";
+            std::cout << "\nYour cart is empty. Add a package first." << std::endl;
             return;
         }
         displayCart();
@@ -194,7 +194,7 @@ private:
         std::cout << "\nProceed to checkout? (Y/N): ";
         std::cin >> confirm;
         if (confirm != 'Y' && confirm != 'y') {
-            std::cout << "Checkout cancelled.\n";
+            std::cout << "Checkout cancelled." << std::endl;
             return;
         }
 
@@ -202,7 +202,7 @@ private:
         if (!(std::cin >> playerEmail)) {
             std::cin.clear();
             std::cin.ignore(10000, '\n');
-            std::cout << "Invalid Player Email.\\n";
+            std::cout << "Invalid Player Email."<< std::endl;
             return;
         }
 
@@ -215,7 +215,7 @@ private:
             current = current->next;
         }
 
-        // --- Execute Payment Method ---
+        // Payment Method Execution
         double finalTotal = PayMethod::processPayment(total);
         int finalTotalInt = static_cast<int>(std::round(finalTotal));
 
@@ -237,9 +237,10 @@ private:
         if (localTime != nullptr)
             dateKey = (localTime->tm_year + 1900) * 10000 + (localTime->tm_mon + 1) * 100 + localTime->tm_mday;
             
-        history.addTransaction(dateKey, playerEmail, totalTokens, finalTotalInt);
+        history.addTransaction(user, dateKey, playerEmail, totalTokens, finalTotalInt);
         clearCart();
     }
+
 public:
     HOKTopUpSystem(PurchaseHistory& h) : head(nullptr), tail(nullptr), history(h) {}
     HOKTopUpSystem(const HOKTopUpSystem&) = delete;
@@ -251,7 +252,7 @@ public:
         std::cout << std::left << std::setw(8) << "Option" << std::setw(18) << "Tokens" << "Price (PHP)" << std::endl;
         std::cout << "-------------------------------------" << std::endl;
         for (int i = 0; i < 6; i++) {
-            std::cout << std::left << std::setw(8) << i + 1 << std::setw(18) << tokensPackages[i] << std::fixed << packagePrices[i] << '\n';
+            std::cout << std::left << std::setw(8) << i + 1 << std::setw(18) << tokensPackages[i] << std::fixed << packagePrices[i] << std::endl;
         }
         std::cout << "-------------------------------------" << std::endl;
         std::cout << "7. View Cart\n8. Checkout\n9. Remove Item from Cart\n";
@@ -261,7 +262,7 @@ public:
         std::cout << "=====================================" << std::endl;
     }
 
-    void run() {
+    void run(const std::string& user = "Guest") {
         int choice;
         while (true) {
             displayPackages();
@@ -269,7 +270,7 @@ public:
             if (!(std::cin >> choice)) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
-                std::cout << "Invalid input. Please enter a number.\\n";
+                std::cout << "Invalid input. Please enter a number." << std::endl;
                 continue;
             }
             if (choice >= 1 && choice <= 6) {
@@ -277,12 +278,12 @@ public:
             } else {
                 switch (choice) {
                     case 7: displayCart(); break;
-                    case 8: checkout(); break;
+                    case 8: checkout(user); break;
                     case 9: removeFromCart(); break;
                     case 10: sortPackages(true); break;
                     case 11: sortPackages(false); break;
-                    case 0: std::cout << "\nThank you for using ML Top-Up!\n"; return;
-                    default: std::cout << "\nInvalid choice. Try again.\n";
+                    case 0: std::cout << "\nThank you for using HOK Top-Up!" << std::endl; return;
+                    default: std::cout << "\nInvalid choice. Try again." << std::endl;
                 }
             }
         }

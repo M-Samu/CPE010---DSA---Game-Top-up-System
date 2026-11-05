@@ -5,17 +5,19 @@
 #include <iomanip>
 #include <string>
 #include <cstdio>
+#include <fstream>
+#include <sstream>
 
-// Base Transaction (for MLBB - legacy format)
 struct Transaction {
     int id;
+    std::string username; // Associated account username
     int dateKey;
     int playerID;
     int zoneID; // -1 if not applicable
     std::string playerEmail; // Empty if not applicable
-    int totalItems; // generic for diamonds, cores, tokens
+    int totalItems;
     int totalAmount;
-    std::string currencyName; // "Diamonds", "Cores", "Tokens"
+    std::string currencyName;
     std::string gameName;
     std::string status;
 };
@@ -26,6 +28,7 @@ private:
     int count;
     int capacity;
     int nextID;
+    const std::string filename = "transactions.txt";
 
     void grow() {
         capacity *= 2;
@@ -112,66 +115,119 @@ private:
         return y * 10000 + m * 100 + d;
     }
 
+    void insertSorted(const Transaction& t) {
+        if (count == capacity) grow();
+        int pos = count;
+        while (pos > 0 && records[pos - 1].dateKey > t.dateKey) {
+            records[pos] = records[pos - 1];
+            pos--;
+        }
+        records[pos] = t;
+        count++;
+        if (t.id >= nextID) {
+            nextID = t.id + 1;
+        }
+    }
+
+    void saveToFile() const {
+        std::ofstream outFile(filename);
+        if (!outFile) return;
+
+        for (int i = 0; i < count; i++) {
+            const Transaction& t = records[i];
+            std::string email = t.playerEmail.empty() ? "NONE" : t.playerEmail;
+            outFile << t.id << "|" 
+                    << t.username << "|" 
+                    << t.dateKey << "|" 
+                    << t.playerID << "|" 
+                    << t.zoneID << "|" 
+                    << email << "|" 
+                    << t.totalItems << "|" 
+                    << t.totalAmount << "|" 
+                    << t.currencyName << "|" 
+                    << t.gameName << "|" 
+                    << t.status << "\n";
+        }
+        outFile.close();
+    }
+
+    void loadFromFile() {
+        std::ifstream inFile(filename);
+        if (!inFile) return;
+
+        std::string line;
+        while (std::getline(inFile, line)) {
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string item;
+            
+            Transaction t;
+            std::string email;
+
+            std::getline(ss, item, '|'); t.id = std::stoi(item);
+            std::getline(ss, t.username, '|');
+            std::getline(ss, item, '|'); t.dateKey = std::stoi(item);
+            std::getline(ss, item, '|'); t.playerID = std::stoi(item);
+            std::getline(ss, item, '|'); t.zoneID = std::stoi(item);
+            std::getline(ss, email, '|'); t.playerEmail = (email == "NONE") ? "" : email;
+            std::getline(ss, item, '|'); t.totalItems = std::stoi(item);
+            std::getline(ss, item, '|'); t.totalAmount = std::stoi(item);
+            std::getline(ss, t.currencyName, '|');
+            std::getline(ss, t.gameName, '|');
+            std::getline(ss, t.status);
+
+            insertSorted(t);
+        }
+        inFile.close();
+    }
+
 public:
-    PurchaseHistory() : records(new Transaction[10]), count(0), capacity(10), nextID(1) {}
+    PurchaseHistory() : records(new Transaction[10]), count(0), capacity(10), nextID(1) {
+        loadFromFile();
+    }
+    
     PurchaseHistory(const PurchaseHistory&) = delete;
     PurchaseHistory& operator=(const PurchaseHistory&) = delete;
     ~PurchaseHistory() { delete[] records; }
 
     // MLBB
-    void addTransaction(int dateKey, int playerID, int zoneID, int totalDiamonds, int totalAmount) {
-        if (count == capacity) grow();
-        int pos = count;
-        while (pos > 0 && records[pos - 1].dateKey > dateKey) {
-            records[pos] = records[pos - 1];
-            pos--;
-        }
-        records[pos] = {nextID++, dateKey, playerID, zoneID, "", totalDiamonds, totalAmount, "Diamonds", "MLBB", "Sent"};
-        count++;
+    void addTransaction(const std::string& user, int dateKey, int playerID, int zoneID, int totalDiamonds, int totalAmount) {
+        Transaction t = {nextID++, user, dateKey, playerID, zoneID, "", totalDiamonds, totalAmount, "Diamonds", "MLBB", "Sent"};
+        insertSorted(t);
+        saveToFile();
     }
 
     // WR
-    void addTransaction(int dateKey, int playerID, int totalCores, int totalAmount) {
-        if (count == capacity) grow();
-        int pos = count;
-        while (pos > 0 && records[pos - 1].dateKey > dateKey) {
-            records[pos] = records[pos - 1];
-            pos--;
-        }
-        records[pos] = {nextID++, dateKey, playerID, -1, "", totalCores, totalAmount, "Cores", "Wild Rift", "Sent"};
-        count++;
+    void addTransaction(const std::string& user, int dateKey, int playerID, int totalCores, int totalAmount) {
+        Transaction t = {nextID++, user, dateKey, playerID, -1, "", totalCores, totalAmount, "Cores", "Wild Rift", "Sent"};
+        insertSorted(t);
+        saveToFile();
     }
 
     // HOK
-    void addTransaction(int dateKey, const std::string& playerEmail, int totalTokens, int totalAmount) {
-        if (count == capacity) grow();
-        int pos = count;
-        while (pos > 0 && records[pos - 1].dateKey > dateKey) {
-            records[pos] = records[pos - 1];
-            pos--;
-        }
-        records[pos] = {nextID++, dateKey, 0, -1, playerEmail, totalTokens, totalAmount, "Tokens", "HoK", "Sent"};
-        count++;
+    void addTransaction(const std::string& user, int dateKey, const std::string& playerEmail, int totalTokens, int totalAmount) {
+        Transaction t = {nextID++, user, dateKey, 0, -1, playerEmail, totalTokens, totalAmount, "Tokens", "HoK", "Sent"};
+        insertSorted(t);
+        saveToFile();
     }
 
-    void loadSampleData() {
-        addTransaction(20260915, 123456789, 1234, 86, 49);  // MLBB
-        addTransaction(20260916, 987654321, 1000, 449);     // WR
-        addTransaction(20261003, "gamer@email.com", 80, 65); // HOK
-    }
-
-    void displayAll() const {
-        if (count == 0) {
-            std::cout << "\nNo recent transactions found...\n";
-            return;
-        }
-        std::cout << "\n";
+    // Displays all transactions belonging to a specific user
+    void displayAll(const std::string& user) const {
+        int userCount = 0;
         printHeader();
-        for (int i = 0; i < count; i++)
-            printRow(records[i]);
+        for (int i = 0; i < count; i++) {
+            if (records[i].username == user) {
+                printRow(records[i]);
+                userCount++;
+            }
+        }
+        if (userCount == 0) {
+            std::cout << "\nNo recent transactions found for " << user << "...\n";
+        }
     }
 
-    void filterDate(int startKey, int endKey) const {
+    // Filters date for a specific user
+    void filterDate(const std::string& user, int startKey, int endKey) const {
         if (startKey > endKey) {
             std::cout << "\nStart date must not be after end date.\n";
             return;
@@ -179,26 +235,30 @@ public:
         int first = lowerBound(startKey);
         int last  = upperBound(endKey);
 
-        if (first >= last) {
-            std::cout << "\nNo transactions found for that date.\n";
+        printHeader();
+        int total = 0;
+        int found = 0;
+        for (int i = first; i < last; i++) {
+            if (records[i].username == user) {
+                printRow(records[i]);
+                total += records[i].totalAmount;
+                found++;
+            }
+        }
+
+        if (found == 0) {
+            std::cout << "\nNo transactions found for " << user << " within that date range.\n";
             return;
         }
 
-        std::cout << "\n";
-        printHeader();
-        int total = 0;
-        for (int i = first; i < last; i++) {
-            printRow(records[i]);
-            total += records[i].totalAmount;
-        }
         std::cout << "------------------------------------------------------------------------------------------------------\n";
-        std::cout << (last - first) << " transaction(s) | Total spent: PHP " << total << "\n";
+        std::cout << found << " transaction(s) | Total spent: PHP " << total << "\n";
     }
 
-    void run() const {
+    void run(const std::string& user) const {
         int choice = -1;
         while (choice != 0) {
-            std::cout << "\n======= PURCHASE HISTORY =======\n";
+            std::cout << "\n======= PURCHASE HISTORY (" << user << ") =======\n";
             std::cout << "1. View all transactions\n";
             std::cout << "2. Filter by date\n";
             std::cout << "3. Filter by date range\n";
@@ -215,16 +275,16 @@ public:
             }
 
             if (choice == 1) {
-                displayAll();
+                displayAll(user);
             } else if (choice == 2) {
                 int d = readDate("\nEnter date (YYYY-MM-DD): ");
                 if (d == -1) std::cout << "Invalid date format.\n";
-                else filterDate(d, d);
+                else filterDate(user, d, d);
             } else if (choice == 3) {
                 int s = readDate("\nEnter start date (YYYY-MM-DD): ");
                 int e = (s == -1) ? -1 : readDate("Enter end date (YYYY-MM-DD): ");
                 if (s == -1 || e == -1) std::cout << "Invalid date format.\n";
-                else filterDate(s, e);
+                else filterDate(user, s, e);
             } else if (choice != 0) {
                 std::cout << "\nInvalid choice.\n";
             }

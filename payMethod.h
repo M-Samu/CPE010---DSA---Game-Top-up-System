@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <cmath>
 
-// --- Array Queue implementation for BNPL Installments ---
+// Array Queue implementation for BNPL
 struct Installment {
     int month;
     double amount;
@@ -33,25 +33,47 @@ public:
         count++;
     }
 
-    // Dequeues and processes each installment in FIFO order
-    void processAllInstallments() {
-        std::cout << "\n--- Processing BNPL Installments (FIFO Queue) ---\n";
-        while (count > 0) {
-            Installment current = queue[front];
-            std::cout << "Paid Month " << current.month << " Installment: PHP " 
-                      << std::fixed << std::setprecision(2) << current.amount << "\n";
-            
-            // Circularly advance front
-            front = (front + 1) % MAX_INSTALLMENTS;
-            count--;
+    double getTotalBalance() const {
+        double total = 0.0;
+        int idx = front;
+        for (int i = 0; i < count; i++) {
+            total += queue[idx].amount;
+            idx = (idx + 1) % MAX_INSTALLMENTS;
         }
-        std::cout << "All installments successfully scheduled and processed!\n";
+        return total;
+    }
+
+    void processNextInstallment() {
+        if (count == 0) {
+            std::cout << "No pending installments to pay.\n";
+            return;
+        }
+        
+        Installment current = queue[front];
+        std::cout << "\n--- Processing Payment ---\n";
+        std::cout << "Successfully Paid Month " << current.month << " Installment: PHP " 
+                  << std::fixed << std::setprecision(2) << current.amount << "\n";
+        std::cout << "--------------------------\n";
+        
+        front = (front + 1) % MAX_INSTALLMENTS;
+        count--;
+    }
+
+    void processAllInstallments() {
+        std::cout << "\n--- Processing All Pending BNPL Installments (FIFO Queue) ---\n";
+        while (count > 0) {
+            processNextInstallment();
+        }
+        std::cout << "All installments successfully processed!\n";
         std::cout << "-------------------------------------------------\n";
     }
 };
 
 class PayMethod {
 public:
+    // Global static queue to share BNPL data across the application
+    static InstallmentQueue globalInstallmentQueue;
+
     // Returns the final computed total after applying any interest
     static double processPayment(double totalAmount) {
         int choice = 0;
@@ -136,19 +158,17 @@ private:
         std::cout << "Total to Pay     : PHP " << finalAmount << "\n";
         std::cout << "Monthly Payment  : PHP " << monthlyPayment << " for " << months << " month(s)\n";
         
-        // Use the Queue Array to process installments
-        InstallmentQueue queue;
-        
-        // Enqueue each month's payment
         for (int i = 1; i <= months; i++) {
-            queue.enqueue(i, monthlyPayment);
+            globalInstallmentQueue.enqueue(i, monthlyPayment);
         }
         
-        // Dequeue (FIFO) to simulate processing the payment schedule
-        queue.processAllInstallments();
+        std::cout << "BNPL successfully scheduled! You can view and pay your balance in Account Details.\n";
 
         return finalAmount;
     }
 };
+
+// Initialize static queue
+inline InstallmentQueue PayMethod::globalInstallmentQueue;
 
 #endif

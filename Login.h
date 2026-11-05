@@ -16,7 +16,7 @@ struct LoginAccount {
 };
 
 // Read all accounts from users.json
-std::vector<LoginAccount> loadLoginAccounts() {
+inline std::vector<LoginAccount> loadLoginAccounts() {
     std::vector<LoginAccount> users;
     std::ifstream in("users.json");
     std::vector<std::string> info;  // every "quoted string" in the file, in order
@@ -32,8 +32,7 @@ std::vector<LoginAccount> loadLoginAccounts() {
         }
     }
 
-    // info: users, then pairs of key/value: username, <name>, password, <pass>, username, ...
-    // A new account starts every time the key "username" appears.
+    // info: users, then pairs of key/value: username, <name>, password, <pass>, username
     for (size_t i = 1; i + 1 < info.size(); i += 2) {
         std::string key = info[i];
         std::string value = info[i + 1];
@@ -50,7 +49,7 @@ std::vector<LoginAccount> loadLoginAccounts() {
 }
 
 // Write all accounts to users.json
-void saveLoginAccounts(const std::vector<LoginAccount>& users) {
+inline void saveLoginAccounts(const std::vector<LoginAccount>& users) {
     std::ofstream out("users.json");
     out << "{\n  \"users\": [\n";
     for (size_t i = 0; i < users.size(); i++) {
@@ -63,11 +62,11 @@ void saveLoginAccounts(const std::vector<LoginAccount>& users) {
 }
 
 // Input cannot be empty or contain a quote mark
-bool isBadInput(const std::string& text) {
+inline bool isBadInput(const std::string& text) {
     return text.empty() || text.find('"') != LOGIN_NOT_FOUND;
 }
 
-void registerLogin() {
+inline void registerLogin() {
     std::vector<LoginAccount> users = loadLoginAccounts();
     LoginAccount account;
 
@@ -93,7 +92,7 @@ void registerLogin() {
 }
 
 // Returns true if the login is correct. The account that logged in is copied into loggedIn.
-bool checkLogin(LoginAccount& loggedIn) {
+inline bool checkLogin(LoginAccount& loggedIn) {
     std::vector<LoginAccount> users = loadLoginAccounts();
     std::string username, password;
 
@@ -114,7 +113,7 @@ bool checkLogin(LoginAccount& loggedIn) {
 }
 
 // Forgot password: the user types a username and the saved password is shown
-void forgotPassword() {
+inline void forgotPassword() {
     std::vector<LoginAccount> users = loadLoginAccounts();
     std::string username;
 
