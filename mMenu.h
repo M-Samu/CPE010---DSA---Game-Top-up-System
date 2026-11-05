@@ -1,8 +1,11 @@
+
 #ifndef MMENU_H
 #define MMENU_H
 
 #include <iostream>
 #include <string>
+#include <cctype>
+
 #include "Login.h"
 #include "PurchaseHistory.h"
 #include "mLTopUp.h"
@@ -12,7 +15,7 @@
 
 class MainMenu {
 private:
-    PurchaseHistory history;      // declared first so it exists before others
+    PurchaseHistory history;
     MLTopUpSystem mlTopUp;
     WRTopUpSystem wrTopUp;
     HOKTopUpSystem hokTopUp;
@@ -26,7 +29,8 @@ private:
         account.display();
     }
 
-    // Register / Login screen. Returns true once the user has logged in,
+    // Register / Login screen
+    // Returns true once the user has logged in,
     // false if they choose to exit.
     bool loginScreen(LoginAccount& who) {
         while (true) {
@@ -39,41 +43,137 @@ private:
             std::cout << "Choose: ";
 
             std::string choice;
-            if (!std::getline(std::cin, choice)) return false;
 
-            if (choice == "1") registerLogin();
-            else if (choice == "2") {
-                if (checkLogin(who)) return true;
+            if (!std::getline(std::cin, choice)) {
+                return false;
             }
-            else if (choice == "3") forgotPassword();
-            else if (choice == "4") return false;
-            else std::cout << "Invalid choice.\n";
+
+            if (choice == "1") {
+                registerLogin();
+            }
+            else if (choice == "2") {
+                if (checkLogin(who)) {
+                    return true;
+                }
+            }
+            else if (choice == "3") {
+                forgotPassword();
+            }
+            else if (choice == "4") {
+                return false;
+            }
+            else {
+                std::cout << "Invalid choice.\n";
+            }
         }
     }
 
+    // Linear Search for games
+
+void searchGames() {
+    std::string games[] = {
+        "Mobile Legends",
+        "Wild Rift",
+        "Honor of Kings"
+    };
+
+    std::string search;
+    bool found = false;
+
+    // Clear leftover newline before getline()
+    std::cin.ignore(10000, '\n');
+
+    std::cout << "\n======== SEARCH GAME ========\n";
+    std::cout << "Enter game name to search: ";
+    std::getline(std::cin, search);
+
+    // Convert search input to lowercase
+    for (char& c : search) {
+        c = static_cast<char>(
+            std::tolower(static_cast<unsigned char>(c))
+        );
+    }
+
+    // Linear Search
+    for (int i = 0; i < 3; i++) {
+        std::string gameName = games[i];
+
+        // Convert current game name to lowercase
+        for (char& c : gameName) {
+            c = static_cast<char>(
+                std::tolower(static_cast<unsigned char>(c))
+            );
+        }
+
+        // Check if search input matches part of the game name
+        if (!search.empty() &&
+            gameName.find(search) != std::string::npos) {
+
+            std::cout << "\nGame found: " << games[i] << '\n';
+            found = true;
+
+            std::cout << "\nOpening game top-up menu...\n";
+
+            // Call the corresponding top-up menu
+            if (i == 0) {
+                mlTopUp.run();
+            }
+            else if (i == 1) {
+                wrTopUp.run();
+            }
+            else if (i == 2) {
+                hokTopUp.run();
+            }
+
+            break;
+        }
+    }
+
+    if (!found) {
+        std::cout << "\nNo matching game found.\n";
+    }
+}
+
+    // Top-Up Menu
     void runTopUpMenu() {
         int choice = 0;
-        while(true) {
+
+        while (true) {
             std::cout << "\n======== TOP-UP MENU ========\n";
             std::cout << "1. Mobile Legends (MLBB)\n";
             std::cout << "2. Wild Rift (WR)\n";
             std::cout << "3. Honor of Kings (HOK)\n";
+            std::cout << "4. Search Game\n";
             std::cout << "0. Back to Main Menu\n";
             std::cout << "=============================\n";
-            std::cout << "Select a game: ";
+            std::cout << "Select an option: ";
 
             if (!(std::cin >> choice)) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
+
                 std::cout << "\nInvalid input.\n";
                 continue;
             }
 
-            if (choice == 1) mlTopUp.run();
-            else if (choice == 2) wrTopUp.run();
-            else if (choice == 3) hokTopUp.run();
-            else if (choice == 0) break;
-            else std::cout << "\nInvalid choice.\n";
+            if (choice == 1) {
+                mlTopUp.run();
+            }
+            else if (choice == 2) {
+                wrTopUp.run();
+            }
+            else if (choice == 3) {
+                hokTopUp.run();
+            }
+            else if (choice == 4) {
+                searchGames();
+            }
+            else if (choice == 0) {
+                break;
+            }
+            else {
+                std::cout << "\nInvalid choice.\n";
+            }
         }
     }
 
@@ -82,7 +182,7 @@ public:
         : mlTopUp(history),
           wrTopUp(history),
           hokTopUp(history),
-          account(history) // Pass the shared history to AccountDetails
+          account(history)
     {
         history.loadSampleData();
 
@@ -104,6 +204,7 @@ public:
     void run() {
         // Must register / log in before reaching the main menu
         LoginAccount who;
+
         if (!loginScreen(who)) {
             std::cout << "\nExiting application. Thank you!\n";
             return;
@@ -121,6 +222,7 @@ public:
             if (!(std::cin >> choice)) {
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
+
                 std::cout << "\nInvalid input. Enter a valid number.\n";
                 continue;
             }
@@ -129,15 +231,19 @@ public:
                 case 1:
                     runTopUpMenu();
                     break;
+
                 case 2:
                     displayPurchaseHistory();
                     break;
+
                 case 3:
                     displayAccountDetails();
                     break;
+
                 case 4:
                     std::cout << "\nExiting application. Thank you!\n";
                     return;
+
                 default:
                     std::cout << "\nInvalid choice. Only select an option between 1 - 4.\n";
                     break;
