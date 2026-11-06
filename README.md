@@ -1,8 +1,8 @@
-**Project Title **
+**Project Title**
 
 In-game currency Top-up system utilizing Buy-now Pay-Later
 
-**Project Description **
+**Project Description**
 
 This project is a C++ terminal based business process system, which presents a game top-up system for MOBA games including Mobile Legends, Wild Rift, and Honor of Kings.
 In addition, the system features a account system, wherein users can register and login an account, in game currency top-up, purchase history tracking, account details.
