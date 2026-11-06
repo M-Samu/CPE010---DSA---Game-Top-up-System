@@ -66,6 +66,8 @@ Enter your choice (1-4): 1
 Select an option: 2
 
 ======= WILD RIFT TOP-UP =======
+
+
 Option  Cores             Price (PHP)
 -------------------------------------
 1       475               249
