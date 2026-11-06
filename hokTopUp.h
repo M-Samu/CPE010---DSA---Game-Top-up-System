@@ -87,7 +87,6 @@ private:
         clearList(sortedList);
         std::cout << "\nPackages sorted by price: "
                   << (ascending ? "Lowest to Highest" : "Highest to Lowest") << std::endl;
-        displayPackages();
     }
 
     void clearList(Node* node) {
