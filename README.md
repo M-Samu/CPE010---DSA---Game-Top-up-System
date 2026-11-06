@@ -873,7 +873,11 @@ ID    Date                Game           Account (ID/Email)       Item Count    
 
 
 1     November 5, 2026    MLBB           12313 (123)              86 Diamonds    PHP 49      Sent
+
+
 2     November 6, 2026    Wild Rift      123123                   1000 Cores     PHP 499     Sent
+
+
 3     November 6, 2026    HoK            testemail@gmail.com      1245 Tokens    PHP 972     Sent
 
 
@@ -899,7 +903,11 @@ ID    Date                Game           Account (ID/Email)       Item Count    
 
 
 1     November 5, 2026    MLBB           12313 (123)              86 Diamonds    PHP 49      Sent
+
+
 2     November 6, 2026    Wild Rift      123123                   1000 Cores     PHP 499     Sent
+
+
 3     November 6, 2026    HoK            testemail@gmail.com      1245 Tokens    PHP 972     Sent
 
 
@@ -955,6 +963,8 @@ ID    Date                Game           Account (ID/Email)       Item Count    
 
 
 2     November 6, 2026    Wild Rift      123123                   1000 Cores     PHP 499     Sent
+
+
 3     November 6, 2026    HoK            testemail@gmail.com      1245 Tokens    PHP 972     Sent
 
 
@@ -1092,7 +1102,11 @@ ID    Date                Game           Account (ID/Email)       Item Count    
 
 
 1     November 5, 2026    MLBB           12313 (123)              86 Diamonds    PHP 49      Sent
+
+
 2     November 6, 2026    Wild Rift      123123                   1000 Cores     PHP 499     Sent
+
+
 3     November 6, 2026    HoK            testemail@gmail.com      1245 Tokens    PHP 972     Sent
 
 
@@ -1197,7 +1211,11 @@ ID    Date                Game           Account (ID/Email)       Item Count    
 
 
 1     November 5, 2026    MLBB           12313 (123)              86 Diamonds    PHP 49      Sent
+
+
 2     November 6, 2026    Wild Rift      123123                   1000 Cores     PHP 499     Sent
+
+
 3     November 6, 2026    HoK            testemail@gmail.com      1245 Tokens    PHP 972     Sent
 
 
