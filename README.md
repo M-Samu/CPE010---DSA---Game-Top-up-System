@@ -20,7 +20,7 @@ And the utilization of Buy Now, Pay Later payment method which allows users to c
 
 **How to compile and run**
 
-When compiling this system, first make sure that you have a C++ compiler like GCC or MinGW installed. Code Runner can also be used.
+When compiling this system, first make sure that you have a C++ compiler like GCC, MinGW, or Code Runner installed. Simply create a clone of the repository in any directory you want, then open and compile it in an IDE like Visual Studio, which will run the system.
 
 
 **Sample Inputs**
